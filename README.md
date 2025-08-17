@@ -6,29 +6,33 @@ graph TB
     end
 
     subgraph "Wallet Layer"
-        WAL[CIP-30 Wallets Nami Eternl Lace]
+        WAL["CIP-30 Wallets\n(Nami / Eternl / Lace)"]
     end
 
     subgraph "Application Layer"
-        WEB[CardanoStake Web Platform]
-        API[RESTful APIs]
+        WEB["CardanoStake Web Dashboard\n(Forecasts · Fee Sim · Recommender)"]
+        API["RESTful APIs\n(AuthN/AuthZ · Rate-Limit · Logging)"]
     end
 
     subgraph "AI/ML Layer"
-        AI[AI ML Engine]
-        ML[Prediction Models]
-        PRED[Fee and Delegation Optimizer]
+        REG["Model Registry & Versioning"]
+        ML["Prediction Models\n(ROS · Delegation · Fees)"]
+        PRED["Fee & Delegation Optimizer"]
+        SERVE["Model Serving Engine\n(FastAPI / MLflow)"]
     end
 
     subgraph "Data Layer"
-        IDX[Indexer dbsync Koios Kupo Oura]
-        DB[(Performance Database)]
-        CACHE[(Recommendation Cache)]
+        IDX["Indexer: db-sync / Koios / Oura / Kupo"]
+        ETL["ETL & Orchestration\n(Cron / Airflow)"]
+        DB[("Performance Database\nStake Pool Metrics")]
+        FEAT["Feature Store\n(Cleaned Features)"]
+        CACHE[("Recommendation Cache")]
+        MON["Monitoring & Observability\n(Prometheus / Grafana)"]
     end
 
     subgraph "Cardano Blockchain"
         CARD[Cardano Network]
-        POOLS[Stake Pool Data]
+        POOLS[On-chain Stake Pool Data]
     end
 
     %% User connections
@@ -42,24 +46,30 @@ graph TB
     API --> WEB
 
     %% AI/ML connections
-    API --> AI
-    AI --> API
-    AI --> ML
-    ML --> AI
-    AI --> PRED
-    PRED --> AI
+    API --> SERVE
+    SERVE --> ML
+    ML --> REG
+    SERVE --> PRED
+    PRED --> CACHE
+    REG --> SERVE
 
     %% Data connections
     CARD --> IDX
-    IDX --> DB
-    DB --> AI
-    AI --> DB
-    AI --> CACHE
+    IDX --> ETL
+    ETL --> DB
+    DB --> FEAT
+    FEAT --> ML
+    ML --> FEAT
+    SERVE --> CACHE
     CACHE --> API
-    API --> CACHE
 
     %% Blockchain connections (via wallet)
     WAL --> CARD
     CARD --> POOLS
+
+    %% Monitoring hooks
+    API --> MON
+    DB --> MON
+    SERVE --> MON
 
 ```
